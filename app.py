@@ -18,6 +18,7 @@ import copy
 from utils.data_loader import load_courses, filter_courses
 from algorithms.greedy_selector import greedy_select_courses
 from algorithms.dp_knapsack import dp_optimize_courses
+from algorithms.cpp_wrapper import is_cpp_available, greedy_optimize_cpp, dp_optimize_cpp
 
 # ──────────────────────────────────────────────
 # Page Configuration
@@ -238,6 +239,30 @@ st.markdown("""
 st.markdown('<h1 class="hero-title">CareerPath Optimizer</h1>', unsafe_allow_html=True)
 st.markdown('<p class="hero-subtitle">Algorithm-Based Learning Roadmap Generator</p>', unsafe_allow_html=True)
 
+# Engine Status Badge
+if is_cpp_available():
+    st.markdown(
+        """
+        <div style="text-align:center; margin-bottom: 20px;">
+            <span style="background: rgba(0, 210, 255, 0.1); color: #00D2FF; border: 1px solid #00D2FF; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">
+                🚀 C++ Engine Active
+            </span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.markdown(
+        """
+        <div style="text-align:center; margin-bottom: 20px;">
+            <span style="background: rgba(255, 179, 71, 0.1); color: #FFB347; border: 1px solid #FFB347; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">
+                ⚠️ Python Engine (C++ Unavailable)
+            </span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 # ──────────────────────────────────────────────
 # Sidebar — User Inputs
 # ──────────────────────────────────────────────
@@ -334,13 +359,25 @@ st.dataframe(courses_df, width="stretch")
 # ──────────────────────────────────────────────
 # Run Algorithms (deep copies to avoid mutation)
 # ──────────────────────────────────────────────
-greedy_courses, greedy_hours, greedy_value = greedy_select_courses(
-    copy.deepcopy(filtered), max_hours
-)
+# --- Greedy selection ---
+if is_cpp_available():
+    greedy_courses, greedy_hours, greedy_value = greedy_optimize_cpp(
+        copy.deepcopy(filtered), max_hours
+    )
+else:
+    greedy_courses, greedy_hours, greedy_value = greedy_select_courses(
+        copy.deepcopy(filtered), max_hours
+    )
 
-dp_courses, dp_hours, dp_value, dp_table = dp_optimize_courses(
-    copy.deepcopy(filtered), max_hours
-)
+# --- DP selection ---
+if is_cpp_available():
+    dp_courses, dp_hours, dp_value, dp_table = dp_optimize_cpp(
+        copy.deepcopy(filtered), max_hours
+    )
+else:
+    dp_courses, dp_hours, dp_value, dp_table = dp_optimize_courses(
+        copy.deepcopy(filtered), max_hours
+    )
 
 # ──────────────────────────────────────────────
 # 4 & 5. Side-by-Side Comparison

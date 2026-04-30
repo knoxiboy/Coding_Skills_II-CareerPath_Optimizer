@@ -8,3 +8,5 @@ data/*.json
 *.exe
 *.obj
 *.o
+*.dll
+*.so
